@@ -32,5 +32,6 @@
     <string name="screen_detail_btn_delete">Delete</string>
     <string name="screen_detail_btn_create">Create</string>
     <string name="screen_detail_btn_save">Save</string>
+    <string name="back_button">Back</string>
 
 </resources>
