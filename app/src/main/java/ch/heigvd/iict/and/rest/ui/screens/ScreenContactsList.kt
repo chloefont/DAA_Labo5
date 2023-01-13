@@ -39,7 +39,7 @@ fun ScreenContactList(
 
     val onAddContact = {navController.navigate(AppScreens.EditContact.name)}
     val onContactSelected = { selectedClient : Contact ->
-        navController.navigate(AppScreens.EditContact.name + "/${selectedClient.id}")
+        navController.navigate(AppScreens.EditContact.name + "?contactId=${selectedClient.id}")
         //Toast.makeText(context, "TODO - Edition de ${selectedContact.firstname} ${selectedContact.name}", Toast.LENGTH_SHORT).show()
     }
 

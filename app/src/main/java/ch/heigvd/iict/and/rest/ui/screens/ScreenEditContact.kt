@@ -11,7 +11,7 @@ import ch.heigvd.iict.and.rest.ui.TopBar
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ScreenEditContact(navController : NavHostController, contact : Contact?) {
+fun ScreenEditContact(navController : NavHostController, contact : Long?) {
     Scaffold(
         topBar = { TopBar(currentScreen = AppScreens.EditContact,
             canNavigateBack = true,

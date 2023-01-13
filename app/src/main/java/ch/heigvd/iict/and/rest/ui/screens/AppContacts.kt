@@ -8,9 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ch.heigvd.iict.and.rest.ContactsApplication
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.navigation.AppScreens
@@ -34,8 +36,11 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
             )
         }
 
-        composable(AppScreens.EditContact.name) {
-            ScreenEditContact(navController = navController, contact = Contact())
+        composable(
+            route = AppScreens.EditContact.name + "?contactId={contactId}",
+            arguments = listOf(navArgument("contactId") { nullable = true })
+        ) {
+            ScreenEditContact(navController = navController, contact = it.arguments?.getLong("contactId"))
         }
 
     }
