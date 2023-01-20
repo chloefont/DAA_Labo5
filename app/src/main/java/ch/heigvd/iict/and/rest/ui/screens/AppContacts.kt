@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -40,9 +39,11 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
             route = AppScreens.EditContact.name + "?contactId={contactId}",
             arguments = listOf(navArgument("contactId") { nullable = true })
         ) {
-            ScreenEditContact(navController = navController, contact = it.arguments?.getLong("contactId"))
+            ScreenEditContact(
+                navController = navController,
+                contact = it.arguments?.getString("contactId")?.toLong(),
+                contactsViewModel = contactsViewModel)
         }
-
     }
 
 }
