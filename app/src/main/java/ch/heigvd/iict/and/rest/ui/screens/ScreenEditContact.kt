@@ -2,7 +2,6 @@ package ch.heigvd.iict.and.rest.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -37,7 +36,7 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
         val nameValue = currentContact?.name
         val firstnameValue = currentContact?.firstname
         val emailValue = currentContact?.email
-        val birthdayValue = currentContact?.birthday ?: Calendar.getInstance().time
+        val birthdayValue = currentContact?.birthday ?: Calendar.getInstance()
         val addressValue = currentContact?.address
         val zipValue = currentContact?.zip
         val cityValue = currentContact?.city
@@ -57,13 +56,13 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
                     .padding(10.dp, 0.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(text = "New contact")
-                textFieldItem(name = "Name", placeHolder = "Name", null)
-                textFieldItem(name = "Firstname", placeHolder = "Firstname", null)
-                textFieldItem(name = "Email", placeHolder = "Email", null)
-                textFieldItem(name = "Birthday", placeHolder = "Birthday", null)
-                textFieldItem(name = "Address", placeHolder = "Address", null)
-                textFieldItem(name = "Zip", placeHolder = "Zip", null)
-                textFieldItem(name = "City", placeHolder = "City", null)
+                textFieldItem(name = "Name", placeHolder = "Name", value = nameValue)
+                textFieldItem(name = "Firstname", placeHolder = "Firstname", firstnameValue)
+                textFieldItem(name = "Email", placeHolder = "Email", emailValue)
+                textFieldItem(name = "Birthday", placeHolder = "Birthday", "birthdayValue")
+                textFieldItem(name = "Address", placeHolder = "Address", addressValue)
+                textFieldItem(name = "Zip", placeHolder = "Zip", zipValue)
+                textFieldItem(name = "City", placeHolder = "City", cityValue)
                 RadioGroup(
                     items = listOf("Home", "Mobile", "Office", "Fax"),
                     selected = selected,
@@ -90,11 +89,8 @@ fun textFieldItem(name : String, placeHolder : String, value : String?) {
         Text(text = name, modifier= Modifier
             .wrapContentHeight()
             .align(Alignment.CenterVertically))
-        if (value != null) {
-            TextField(value = "", onValueChange = {}, placeholder = { Text(text = placeHolder!!) })
-        } else {
-            TextField(value = "", placeholder = { Text(text = placeHolder!!) }, onValueChange = {})
-        }
+        val finalValue = value ?: ""
+        TextField(value = finalValue, onValueChange = {}, placeholder = { Text(text = placeHolder!!) })
     }
 }
 
