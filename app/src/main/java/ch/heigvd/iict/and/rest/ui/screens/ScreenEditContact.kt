@@ -1,17 +1,17 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.navigation.AppScreens
 import ch.heigvd.iict.and.rest.ui.TopBar
 
@@ -23,21 +23,50 @@ fun ScreenEditContact(navController : NavHostController, contact : Long?) {
             canNavigateBack = true,
             onNavigateBack = { navController.navigateUp() }) }
     ) {
-        Column() {
-            Text(text = "new contact")
-            nameTextFieldItem(name = "Cux", placeHolder = "Name", null)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(text = "New contact")
+            textFieldItem(name = "Name", placeHolder = "Name", null)
+            textFieldItem(name = "Firstname", placeHolder = "Firstname", null)
+            textFieldItem(name = "Email", placeHolder = "Email", null)
+            textFieldItem(name = "Birthday", placeHolder = "Birthday", null)
+            textFieldItem(name = "Address", placeHolder = "Address", null)
+            textFieldItem(name = "Zip", placeHolder = "Zip", null)
+            textFieldItem(name = "City", placeHolder = "City", null)
+            textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
         }
     }
 }
 
 @Composable
-fun nameTextFieldItem(name : String, placeHolder : String, value : String?) {
-    Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = name)
+fun textFieldItem(name : String, placeHolder : String, value : String?) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier= Modifier
+        .wrapContentSize(Alignment.Center)
+        .fillMaxWidth()) {
+        Text(text = name, modifier= Modifier
+            .wrapContentHeight()
+            .align(Alignment.CenterVertically))
         if (value != null) {
             TextField(value = "", onValueChange = {}, placeholder = { Text(text = placeHolder!!) })
         } else {
             TextField(value = "", placeholder = { Text(text = placeHolder!!) }, onValueChange = {})
         }
     }
+}
+
+@Composable
+fun RadioGroup(items: List<String>,
+               selected: String,
+               setSelected: (selected: String) -> Unit) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+        items.forEach { item ->
+            RadioButton(
+                selected = item == selected,
+                onClick = { setSelected(item) }
+            )
+            Text(text = item, textAlign = TextAlign.Center)
+        }
+    }
+
 }
