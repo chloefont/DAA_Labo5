@@ -10,6 +10,9 @@ import androidx.compose.material.TextField
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Create
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +57,8 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(10.dp, 0.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(10.dp, 0.dp)
+                    .verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(text = "New contact")
                 textFieldItem(name = "Name", placeHolder = "Name", null)
@@ -72,9 +76,19 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
                 )
                 textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
 
-                Row {
+                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     Button(onClick = { /*TODO*/ }) {
                         Text(text = "Cancel")
+                    }
+
+                    Button(onClick = { /*TODO*/ }) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Delete")
+                        Text(text = "Delete")
+                    }
+
+                    Button(onClick = { /*TODO*/ }) {
+                        Icon(Icons.Outlined.Create, contentDescription = "Save")
+                        Text(text = "Save")
                     }
                 }
             }
