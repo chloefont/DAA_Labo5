@@ -54,7 +54,7 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(10.dp, 0.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(text = "New contact")
                 textFieldItem(name = "Name", placeHolder = "Name", null)
@@ -71,12 +71,14 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
                     title = "Phone type"
                 )
                 textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
-            }
-            Row {
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Cancel")
+
+                Row {
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "Cancel")
+                    }
                 }
             }
+
         }
 }
 
