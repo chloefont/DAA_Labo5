@@ -7,6 +7,9 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +71,11 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
                     title = "Phone type"
                 )
                 textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
+            }
+            Row {
+                Button(onClick = { /*TODO*/ }) {
+                    Text(text = "Cancel")
+                }
             }
         }
 }
