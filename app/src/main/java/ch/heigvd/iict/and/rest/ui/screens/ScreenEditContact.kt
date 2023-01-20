@@ -8,6 +8,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -27,6 +29,7 @@ import java.util.Calendar
 fun ScreenEditContact(navController: NavHostController, contact: Long?, contactsViewModel: ContactsViewModel) {
     val contacts: List<Contact> by contactsViewModel.allContacts.observeAsState(initial = emptyList())
     val currentContact = contacts.find { it.id == contact!! }
+    val (selected, setSelected) = remember { mutableStateOf("")
 
     val nameValue = currentContact?.name
     val firstnameValue = currentContact?.firstname
@@ -39,26 +42,23 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
     val phonenumberValue = currentContact?.phoneNumber
 
     Scaffold(
-        topBar = {
-            TopBar(currentScreen = AppScreens.EditContact,
-                canNavigateBack = true,
-                onNavigateBack = { navController.navigateUp() })
-        }
+        topBar = { TopBar(currentScreen = AppScreens.EditContact,
+            canNavigateBack = true,
+            onNavigateBack = { navController.navigateUp() }) }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(text = "New contact")
-            textFieldItem(name = "Name", placeHolder = "Name", nameValue)
-            textFieldItem(name = "Firstname", placeHolder = "Firstname", firstnameValue)
-            textFieldItem(name = "Email", placeHolder = "Email", emailValue)
-            textFieldItem(name = "Birthday", placeHolder = "Birthday", birthdayValue?.toString())
-            textFieldItem(name = "Address", placeHolder = "Address", addressValue)
-            textFieldItem(name = "Zip", placeHolder = "Zip", zipValue)
-            textFieldItem(name = "City", placeHolder = "City", cityValue)
-            textFieldItem(name = "Phone number", placeHolder = "Phone number", phonenumberValue)
+            textFieldItem(name = "Name", placeHolder = "Name", null)
+            textFieldItem(name = "Firstname", placeHolder = "Firstname", null)
+            textFieldItem(name = "Email", placeHolder = "Email", null)
+            textFieldItem(name = "Birthday", placeHolder = "Birthday", null)
+            textFieldItem(name = "Address", placeHolder = "Address", null)
+            textFieldItem(name = "Zip", placeHolder = "Zip", null)
+            textFieldItem(name = "City", placeHolder = "City", null)
+            RadioGroup(items = listOf("Home", "Mobile", "Office", "Fax"), selected = selected, setSelected = setSelected, title = "Phone type")
+            textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
         }
     }
 }
@@ -80,16 +80,21 @@ fun textFieldItem(name : String, placeHolder : String, value : String?) {
 }
 
 @Composable
-fun RadioGroup(items: List<String>,
+fun RadioGroup(title: String,
+               items: List<String>,
                selected: String,
                setSelected: (selected: String) -> Unit) {
+    Text(text = title)
     Row(horizontalArrangement = Arrangement.SpaceBetween) {
         items.forEach { item ->
             RadioButton(
                 selected = item == selected,
-                onClick = { setSelected(item) }
+                onClick = { setSelected(item) },
+                enabled = true,
             )
-            Text(text = item, textAlign = TextAlign.Center)
+            Text(text = item, textAlign = TextAlign.Center, modifier= Modifier
+                .wrapContentHeight()
+                .align(Alignment.CenterVertically))
         }
     }
 
