@@ -29,38 +29,47 @@ import java.util.Calendar
 fun ScreenEditContact(navController: NavHostController, contact: Long?, contactsViewModel: ContactsViewModel) {
     val contacts: List<Contact> by contactsViewModel.allContacts.observeAsState(initial = emptyList())
     val currentContact = contacts.find { it.id == contact!! }
-    val (selected, setSelected) = remember { mutableStateOf("")
+    val (selected, setSelected) = remember { mutableStateOf("")}
 
-    val nameValue = currentContact?.name
-    val firstnameValue = currentContact?.firstname
-    val emailValue = currentContact?.email
-    val birthdayValue = currentContact?.birthday ?: Calendar.getInstance().time
-    val addressValue = currentContact?.address
-    val zipValue = currentContact?.zip
-    val cityValue = currentContact?.city
-    val phonetypeValue = currentContact?.type ?: PhoneType.MOBILE
-    val phonenumberValue = currentContact?.phoneNumber
+        val nameValue = currentContact?.name
+        val firstnameValue = currentContact?.firstname
+        val emailValue = currentContact?.email
+        val birthdayValue = currentContact?.birthday ?: Calendar.getInstance().time
+        val addressValue = currentContact?.address
+        val zipValue = currentContact?.zip
+        val cityValue = currentContact?.city
+        val phonetypeValue = currentContact?.type ?: PhoneType.MOBILE
+        val phonenumberValue = currentContact?.phoneNumber
 
-    Scaffold(
-        topBar = { TopBar(currentScreen = AppScreens.EditContact,
-            canNavigateBack = true,
-            onNavigateBack = { navController.navigateUp() }) }
-    ) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(text = "New contact")
-            textFieldItem(name = "Name", placeHolder = "Name", null)
-            textFieldItem(name = "Firstname", placeHolder = "Firstname", null)
-            textFieldItem(name = "Email", placeHolder = "Email", null)
-            textFieldItem(name = "Birthday", placeHolder = "Birthday", null)
-            textFieldItem(name = "Address", placeHolder = "Address", null)
-            textFieldItem(name = "Zip", placeHolder = "Zip", null)
-            textFieldItem(name = "City", placeHolder = "City", null)
-            RadioGroup(items = listOf("Home", "Mobile", "Office", "Fax"), selected = selected, setSelected = setSelected, title = "Phone type")
-            textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
+        Scaffold(
+            topBar = {
+                TopBar(currentScreen = AppScreens.EditContact,
+                    canNavigateBack = true,
+                    onNavigateBack = { navController.navigateUp() })
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp, 0.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(text = "New contact")
+                textFieldItem(name = "Name", placeHolder = "Name", null)
+                textFieldItem(name = "Firstname", placeHolder = "Firstname", null)
+                textFieldItem(name = "Email", placeHolder = "Email", null)
+                textFieldItem(name = "Birthday", placeHolder = "Birthday", null)
+                textFieldItem(name = "Address", placeHolder = "Address", null)
+                textFieldItem(name = "Zip", placeHolder = "Zip", null)
+                textFieldItem(name = "City", placeHolder = "City", null)
+                RadioGroup(
+                    items = listOf("Home", "Mobile", "Office", "Fax"),
+                    selected = selected,
+                    setSelected = setSelected,
+                    title = "Phone type"
+                )
+                textFieldItem(name = "Phone number", placeHolder = "Phone number", null)
+            }
         }
-    }
 }
 
 @Composable
