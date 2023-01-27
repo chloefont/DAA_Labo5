@@ -1,7 +1,6 @@
 package ch.heigvd.iict.and.rest.viewmodels
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.*
 import ch.heigvd.iict.and.rest.ContactsApplication
@@ -16,6 +15,13 @@ import java.net.URL
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
 
     private val repository = application.repository
+    private var apiUuid : String? = null
+
+    init {
+        if (getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).contains("UUID")) {
+            apiUuid = getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).getString("UUID", "")
+        }
+    }
 
     val allContacts : LiveData<List<Contact>>get() = repository.allContacts
     val apiBaseURL = "https://daa.iict.ch"
@@ -24,23 +30,20 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         viewModelScope.launch {
             repository.clearAllContacts()
 
-            val uid = getAPIUuid()
-            getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).edit().putString("UUID", uid).apply()
-            Log.i("DEV", "UUID: $uid")
+            apiUuid = getAPIUuid()
+            getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).edit().putString("UUID", apiUuid).apply()
+            Log.i("DEV", "UUID: $apiUuid")
         }
     }
 
     fun refresh() {
-        Log.d("DEV", "refresh")
         viewModelScope.launch {
-            if (getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).contains("UUID")) {
-                Log.d("DEV", "UUID found")
-                val uuid = getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).getString("UUID", "")
+            if (apiUuid != null) {
                 val url = URL("$apiBaseURL/contacts")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.doOutput = true
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("X-UUID", uuid)
+                connection.setRequestProperty("X-UUID", apiUuid)
 
                 connection.inputStream.use { input ->
                     val result = input.bufferedReader().use { it.readText() }
