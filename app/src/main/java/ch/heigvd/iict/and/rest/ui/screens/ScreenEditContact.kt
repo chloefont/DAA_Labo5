@@ -33,7 +33,11 @@ import java.util.Calendar
 @Composable
 fun ScreenEditContact(navController: NavHostController, contact: Long?, contactsViewModel: ContactsViewModel) {
     val contacts: List<Contact> by contactsViewModel.allContacts.observeAsState(initial = emptyList())
-    val currentContact = contacts.find { it.id == contact!! }
+    var currentContact : Contact? = null
+    if (contact != null) {
+        currentContact = contacts.find { it.id == contact!! }
+    }
+
     val (selected, setSelected) = remember { mutableStateOf("")}
 
         val nameValue = currentContact?.name
