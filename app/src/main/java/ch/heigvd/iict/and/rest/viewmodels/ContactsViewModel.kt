@@ -55,7 +55,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun addContact(contact: Contact) {
         viewModelScope.launch {
-            //TODO
+
         }
     }
 
