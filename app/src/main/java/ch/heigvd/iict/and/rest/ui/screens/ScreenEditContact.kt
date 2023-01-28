@@ -167,9 +167,12 @@ fun ScreenEditContact(
                     )
                     if (contact == null) {
                         contactsViewModel.addContact(newContact)
-                    } else {
+                    } else if (found != null) {
+                        newContact.id = found.id
                         contactsViewModel.changeContact(newContact)
                     }
+
+                    navController.navigateUp()
                 }) {
                     Icon(Icons.Outlined.Create, contentDescription = "Save")
                     Text(text = "Save")
