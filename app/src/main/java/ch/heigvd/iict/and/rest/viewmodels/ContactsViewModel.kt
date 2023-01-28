@@ -26,6 +26,10 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     val allContacts : LiveData<List<Contact>>get() = repository.allContacts
     val apiBaseURL = "https://daa.iict.ch"
 
+    fun getContactById(id: Long?) : Contact? {
+        return allContacts.value?.find { it.id == id }
+    }
+
     fun enroll() {
         viewModelScope.launch {
             repository.clearAllContacts()
@@ -55,13 +59,15 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun addContact(contact: Contact) {
         viewModelScope.launch {
+            repository.addContact(contact)
+
 
         }
     }
 
     fun changeContact(contact: Contact) {
         viewModelScope.launch {
-            //TODO
+            repository.changeContact(contact)
         }
     }
 
@@ -69,6 +75,22 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
         val url = URL("$apiBaseURL/enroll")
         return@withContext url.readText(Charsets.UTF_8)
+    }
+
+    suspend fun apiAddContact() : String = withContext(Dispatchers.IO) {
+        if (apiUuid != null) {
+            val url = URL("$apiBaseURL/contacts")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.doOutput = true
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("X-UUID", apiUuid)
+
+            connection.inputStream.use { input ->
+                val result = input.bufferedReader().use { it.readText() }
+                Log.d("DEV1", "Result: $result")
+            }
+        }
+        return@withContext ""
     }
 
 }
