@@ -81,7 +81,7 @@ fun ScreenEditContact(navController: NavHostController, contact: Long?, contacts
                     .verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(text = "New contact")
-                textFieldItem(name = "Name", placeHolder = "Name", value = nameValue, onValueChanged = {
+                textFieldItem(name = "Name", placeHolder = "Name", value = currentContact.name, onValueChanged = {
                     Log.d("ScreenEditContact", "Name changed to $it")
                     setCurrentContact(currentContact.copy(name = it!!))
                 })
