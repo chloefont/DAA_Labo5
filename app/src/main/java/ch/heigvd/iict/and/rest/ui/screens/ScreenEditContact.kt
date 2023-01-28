@@ -129,9 +129,15 @@ fun ScreenEditContact(
                     Text(text = "Cancel")
                 }
 
-                Button(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Delete")
-                    Text(text = "Delete")
+                if (found != null) {
+                    Button(onClick = {
+                        contactsViewModel.deleteContact(found)
+
+                        navController.navigateUp()
+                    }) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Delete")
+                        Text(text = "Delete")
+                    }
                 }
 
                 Button(onClick = {

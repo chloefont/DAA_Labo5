@@ -35,4 +35,10 @@ class ContactsRepository(private val contactsDao: ContactsDao) {
         }
         return contact
     }
+
+    fun deleteContact(contact: Contact) {
+        thread {
+            contactsDao.delete(contact)
+        }
+    }
 }

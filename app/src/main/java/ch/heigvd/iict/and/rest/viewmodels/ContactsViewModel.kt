@@ -71,6 +71,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         }
     }
 
+    fun deleteContact(contact: Contact) {
+        viewModelScope.launch {
+            repository.deleteContact(contact)
+        }
+    }
+
     suspend fun getAPIUuid() : String = withContext(Dispatchers.IO) {
 
         val url = URL("$apiBaseURL/enroll")
