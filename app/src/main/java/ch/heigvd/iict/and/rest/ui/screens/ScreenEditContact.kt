@@ -109,16 +109,7 @@ fun ScreenEditContact(
             RadioGroup(
                 items = listOf("Home", "Mobile", "Office", "Fax"),
                 selected = selected,
-                setSelected = {
-                    setSelected(it)
-                    Log.d("RadioGroup", "Selected: $it")
-                    when (it) {
-                        "Home" -> currentContact.type = PhoneType.HOME
-                        "Mobile" -> currentContact.type = PhoneType.MOBILE
-                        "Office" -> currentContact.type = PhoneType.OFFICE
-                        "Fax" -> currentContact.type = PhoneType.FAX
-                    }
-                },
+                setSelected = setSelected,
                 title = "Phone type"
             )
             textFieldItem(
@@ -134,7 +125,7 @@ fun ScreenEditContact(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = { navController.navigateUp() }) {
                     Text(text = "Cancel")
                 }
 
