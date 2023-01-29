@@ -7,9 +7,13 @@ import ch.heigvd.iict.and.rest.ContactsApplication
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.StatusType
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.LinkedList
@@ -101,7 +105,23 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun get_contacts(): List<Contact> {
-        return LinkedList<Contact>();
+        val url = URL("https://daa.iict.ch/contacts")
+
+
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "GET"
+        conn.setRequestProperty("x-uuid", apiUuid!!)
+
+        var data = "";
+        BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
+            data = br.readText()
+        }
+
+        val gson = Gson()
+        val valtype = mutableListOf<Contact>()::class.java
+        val result = gson.fromJson(data, valtype)
+
+        return result;
     }
 
     fun get_contact(id: Long): Contact? {
