@@ -41,7 +41,7 @@ class ContactsRepository(private val contactsDao: ContactsDao) {
         thread {
             contact = contactsDao.getAllContacts()
         }
-        return contact!!
+        return contact?: mutableListOf()
     }
 
     fun deleteContact(contact: Contact) {

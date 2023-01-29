@@ -4,10 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.*
 import ch.heigvd.iict.and.rest.ContactsApplication
+import ch.heigvd.iict.and.rest.models.CalendarTypeAdapter
 import ch.heigvd.iict.and.rest.models.Contact
-import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.models.StatusType
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,6 +17,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
 
 
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
@@ -52,12 +55,24 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
                 Context.MODE_PRIVATE
             ).edit().putString("UUID", apiUuid).apply()
             Log.i("DEV", "UUID: $apiUuid")
+
+            withContext(Dispatchers.IO){
+                val contacts = get_contacts()
+                for (contact in contacts){
+                    contact.remoteId = contact.id
+                    contact.id = null
+                    contact.status = StatusType.OK
+                    repository.addContact(contact)
+                }
+            }
         }
     }
 
     fun refresh() {
-        var contacts = repository.getAllContacts();
-        for (contact in contacts) {
+        println(apiUuid)
+        var contacts = repository.allContacts;
+
+        for (contact in contacts.value!!) {
             if (contact.status == StatusType.OK) {
                 continue;
             }
@@ -67,7 +82,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
                 contact.remoteId = remoteId
                 contact.status = StatusType.OK
-                changeContact(contact)
+                repository.changeContact(contact)
             }
 
             fun new(contact: Contact) {
@@ -75,12 +90,14 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
                 contact.remoteId = remoteId
                 contact.status = StatusType.OK
-                changeContact(contact)
+                repository.changeContact(contact)
             }
 
             fun delete(contact: Contact) {
                 val result = delete_contact(contact)
-                deleteContact(contact)
+                if (result) {
+                    repository.deleteContact(contact)
+                }
             }
 
             // Lancer thread IO
@@ -99,7 +116,6 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun post_contact(contact: Contact): Long? {
-        var id = contact.remoteId;
         val url = URL("https://daa.iict.ch/contacts/")
 
 
@@ -109,7 +125,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         conn.setRequestProperty("Content-Type", "application/json")
 
         contact.id = null
-        val gson = Gson()
+        val gson = GsonBuilder()
+            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .create()
         val json: String = gson.toJson(contact)
         conn.outputStream.use { output ->
             output.write(json.toByteArray(Charsets.UTF_8))
@@ -124,8 +142,8 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             data = br.readText()
         }
 
-        val valtype = Contact::class.java
-        val result = gson.fromJson(data, valtype)
+        val valtype = object : TypeToken<Contact?>() {}.type
+        val result = gson.fromJson<Contact?>(data, valtype)
 
         return result.id
     }
@@ -144,9 +162,11 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             data = br.readText()
         }
 
-        val gson = Gson()
-        val valtype = mutableListOf<Contact>()::class.java
-        val result = gson.fromJson(data, valtype)
+        val gson = GsonBuilder()
+            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .create()
+        val valtype = object : TypeToken<List<Contact>?>() {}.type
+        val result:List<Contact> = gson.fromJson<List<Contact>>(data, valtype) as List<Contact>
 
         return result;
     }
@@ -193,7 +213,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         conn.setRequestProperty("x-uuid", apiUuid!!)
         conn.setRequestProperty("Content-Type", "application/json")
 
-        val gson = Gson()
+        val gson = GsonBuilder()
+            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .create()
         val json: String = gson.toJson(contact)
         conn.outputStream.use { output ->
             output.write(json.toByteArray(Charsets.UTF_8))
@@ -208,32 +230,60 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             data = br.readText()
         }
 
-        val valtype = Contact::class.java
-        val result = gson.fromJson(data, valtype)
+        val valtype = object : TypeToken<Contact?>() {}.type
+        val result = gson.fromJson<Contact?>(data, valtype)
 
         return result.id
     }
 
     fun addContact(contact: Contact) {
         viewModelScope.launch {
-            contact.status = StatusType.NEW
-            repository.addContact(contact)
+            withContext(Dispatchers.IO){
+                contact.status = StatusType.NEW
 
-            if (apiUuid != null) {
-                apiAddContact(contact)
+                if (apiUuid != null) {
+                    var remoteId:Long? = post_contact(contact)
+                    if (remoteId != null){
+                        contact.remoteId = remoteId
+                        contact.status = StatusType.OK
+                    }
+
+                }
+
+                repository.addContact(contact)
             }
         }
     }
 
     fun changeContact(contact: Contact) {
         viewModelScope.launch {
-            repository.changeContact(contact)
+            withContext(Dispatchers.IO){
+                contact.status = StatusType.UPDATED
+                if (apiUuid != null) {
+                    val remoteId:Long? = put_contact(contact)
+                    contact.remoteId = remoteId
+                    contact.status = StatusType.OK
+                }
+
+                repository.changeContact(contact)
+            }
         }
     }
 
     fun deleteContact(contact: Contact) {
         viewModelScope.launch {
-            repository.deleteContact(contact)
+
+            if (apiUuid != null) {
+                val ok = delete_contact(contact)
+                if (ok) {
+                    repository.deleteContact(contact)
+                }else{
+                    contact.status = StatusType.DELETED
+                    repository.changeContact(contact)
+                }
+            }
+
+
         }
     }
 
@@ -241,30 +291,6 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
         val url = URL("$apiBaseURL/enroll")
         return@withContext url.readText(Charsets.UTF_8)
-    }
-
-    suspend fun apiAddContact(contact: Contact): Long? = withContext(Dispatchers.IO) {
-
-        val url = URL("$apiBaseURL/contacts")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.doOutput = true
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("X-UUID", apiUuid)
-        connection.setRequestProperty("Content-Type", "application/json")
-
-        contact.id = null
-        val gson = Gson()
-        val json: String = gson.toJson(contact)
-        connection.outputStream.use { output ->
-            output.write(json.toByteArray(Charsets.UTF_8))
-        }
-
-        connection.inputStream.use { input ->
-            val result = input.bufferedReader().use { it.readText() }
-            Log.d("DEV1", "Result: $result")
-        }
-
-        return@withContext null
     }
 
 }

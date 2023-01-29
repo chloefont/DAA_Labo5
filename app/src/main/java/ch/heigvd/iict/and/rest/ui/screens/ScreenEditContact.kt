@@ -78,7 +78,7 @@ fun ScreenEditContact(
             textFieldItem(
                 name = "Birthday",
                 placeHolder = "Birthday",
-                value = simpleDateFormat.format(birthday?.time)
+                value = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").format(birthday?.time)
             ) //TODO : add date picker? not obligatory
             textFieldItem(name = "Address", placeHolder = "Address", address, onValueChanged = {
                 setAddress(it!!)
