@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.LinkedList
 
 
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
@@ -57,6 +58,26 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
                 }
             }
         }
+    }
+
+    fun post_contact(contact: Contact):Long?{
+        return 0;
+    }
+
+    fun get_contacts():List<Contact>{
+        return LinkedList<Contact>();
+    }
+
+    fun get_contact(id:Long):Contact?{
+        return null;
+    }
+
+    fun delete_contact(contact: Contact):Boolean{
+        return true;
+    }
+
+    fun put_contact(contact: Contact):Long?{
+        return 0;
     }
 
     fun addContact(contact: Contact) {
