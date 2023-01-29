@@ -1,6 +1,8 @@
 package ch.heigvd.iict.and.rest.viewmodels
 
 import android.content.Context
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
 import android.util.Log
 import androidx.lifecycle.*
 import ch.heigvd.iict.and.rest.ContactsApplication
@@ -24,8 +26,10 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     private val repository = application.repository
     private var apiUuid: String? = null
+    private lateinit var connManager: ConnectivityManager
 
     init {
+        connManager = application.applicationContext.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         if (getApplication<ContactsApplication>().getSharedPreferences(
                 "ContactsApp",
                 Context.MODE_PRIVATE
@@ -116,6 +120,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun post_contact(contact: Contact): Long? {
+        if(connManager.getNetworkCapabilities(connManager.activeNetwork) == null){
+            return null
+        }
         val url = URL("https://daa.iict.ch/contacts/")
 
 
@@ -150,6 +157,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun get_contacts(): List<Contact> {
+        if(connManager.getNetworkCapabilities(connManager.activeNetwork) == null){
+            return mutableListOf()
+        }
 
         val url = URL("https://daa.iict.ch/contacts")
 
@@ -193,6 +203,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun delete_contact(contact: Contact): Boolean {
+        if(connManager.getNetworkCapabilities(connManager.activeNetwork) == null){
+            return false
+        }
         var id = contact.remoteId;
         val url = URL("https://daa.iict.ch/contacts/$id")
 
@@ -205,6 +218,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun put_contact(contact: Contact): Long? {
+        if(connManager.getNetworkCapabilities(connManager.activeNetwork) == null){
+            return null
+        }
         var id = contact.remoteId;
         val url = URL("https://daa.iict.ch/contacts/$id")
 
