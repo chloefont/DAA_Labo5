@@ -1,4 +1,8 @@
 # Développement Android Laboratoire n°5 - Application communicante
+
+### Auteurs
+Chloé Fontaine, Luca Coduri, Tania Nunez
+
 ## Implémentation de l'enrollment
 À l'appui du bouton d'enrollement, l'application va vider la base de données locale, effectuer un
 GET sur l'endpoint /enroll et sauvegarder l'UUID retourné dans une variable de notre ContactsViewModel.
