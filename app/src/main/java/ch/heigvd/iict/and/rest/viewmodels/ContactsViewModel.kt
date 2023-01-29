@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.*
 import ch.heigvd.iict.and.rest.ContactsApplication
 import ch.heigvd.iict.and.rest.models.Contact
+import ch.heigvd.iict.and.rest.models.StatusType
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,7 +53,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
                 connection.inputStream.use { input ->
                     val result = input.bufferedReader().use { it.readText() }
-                    Log.d("DEV1", "Result: $result")
+                    Log.d("DEV", "Result: $result")
                 }
             }
         }
@@ -59,9 +61,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun addContact(contact: Contact) {
         viewModelScope.launch {
+            contact.status = StatusType.NEW
             repository.addContact(contact)
 
-
+            if (apiUuid != null) {
+                apiAddContact(contact)
+            }
         }
     }
 
@@ -83,20 +88,28 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         return@withContext url.readText(Charsets.UTF_8)
     }
 
-    suspend fun apiAddContact() : String = withContext(Dispatchers.IO) {
-        if (apiUuid != null) {
-            val url = URL("$apiBaseURL/contacts")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.doOutput = true
-            connection.requestMethod = "GET"
-            connection.setRequestProperty("X-UUID", apiUuid)
+    suspend fun apiAddContact(contact: Contact) : Long? = withContext(Dispatchers.IO) {
 
-            connection.inputStream.use { input ->
-                val result = input.bufferedReader().use { it.readText() }
-                Log.d("DEV1", "Result: $result")
-            }
+        val url = URL("$apiBaseURL/contacts")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.doOutput = true
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("X-UUID", apiUuid)
+        connection.setRequestProperty("Content-Type", "application/json")
+
+        contact.id = null
+        val gson = Gson()
+        val json: String = gson.toJson(contact)
+        connection.outputStream.use { output ->
+            output.write(json.toByteArray(Charsets.UTF_8))
         }
-        return@withContext ""
+
+        connection.inputStream.use { input ->
+            val result = input.bufferedReader().use { it.readText() }
+            Log.d("DEV1", "Result: $result")
+        }
+
+        return@withContext null
     }
 
 }

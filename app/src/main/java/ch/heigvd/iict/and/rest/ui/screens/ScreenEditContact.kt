@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
+import ch.heigvd.iict.and.rest.models.StatusType
 import ch.heigvd.iict.and.rest.navigation.AppScreens
 import ch.heigvd.iict.and.rest.ui.TopBar
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
@@ -32,18 +33,6 @@ fun ScreenEditContact(
 ) {
 
     val found : Contact? = contactsViewModel.getContactById(contact)
-
-    val currentContact = Contact(
-        firstname = "",
-        name = "",
-        email = "",
-        phoneNumber = "",
-        type = PhoneType.MOBILE,
-        birthday = Calendar.getInstance(),
-        address = "",
-        city = "",
-        zip = "",
-    )
 
 
     val (selected, setSelected) = remember { mutableStateOf(found?.type.toString() ?: PhoneType.MOBILE.toString()) }
@@ -75,7 +64,6 @@ fun ScreenEditContact(
             Text(text = "New contact")
             textFieldItem(name = "Name", placeHolder = "Name", value = name, onValueChanged = {
                 setName(it!!)
-                currentContact.name = it
             })
             textFieldItem(
                 name = "Firstname",
@@ -83,28 +71,23 @@ fun ScreenEditContact(
                 value = firstname,
                 onValueChanged = {
                     setFirstname(it!!)
-                    currentContact.firstname = it
                 })
             textFieldItem(name = "Email", placeHolder = "Email", email, onValueChanged = {
                 setEmail(it!!)
-                currentContact.email = it
             })
             textFieldItem(
                 name = "Birthday",
                 placeHolder = "Birthday",
-                value = simpleDateFormat.format(currentContact.birthday?.time)
+                value = simpleDateFormat.format(birthday?.time)
             ) //TODO : add date picker? not obligatory
             textFieldItem(name = "Address", placeHolder = "Address", address, onValueChanged = {
                 setAddress(it!!)
-                currentContact.address = it
             })
             textFieldItem(name = "Zip", placeHolder = "Zip", zip, onValueChanged = {
                 setZip(it!!)
-                currentContact.zip = it
             })
             textFieldItem(name = "City", placeHolder = "City", city, onValueChanged = {
                 setCity(it!!)
-                currentContact.city = it
             })
             RadioGroup(
                 items = listOf("Home", "Mobile", "Office", "Fax"),
@@ -118,7 +101,6 @@ fun ScreenEditContact(
                 phoneNumber,
                 onValueChanged = {
                     setPhoneNumber(it!!)
-                    currentContact.phoneNumber = it
                 })
 
             Row(
@@ -141,7 +123,6 @@ fun ScreenEditContact(
                 }
 
                 Button(onClick = {
-                    Log.d("Contact", currentContact.toString())
 
                     val phoneType = when (selected) {
                         "Home" -> PhoneType.HOME
@@ -161,6 +142,8 @@ fun ScreenEditContact(
                         address = address,
                         city = city,
                         zip = zip,
+                        remoteId = found?.remoteId ?: null,
+                        status = StatusType.NEW
                     )
                     if (contact == null) {
                         contactsViewModel.addContact(newContact)

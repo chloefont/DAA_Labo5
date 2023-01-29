@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
+import ch.heigvd.iict.and.rest.models.StatusType
 import ch.heigvd.iict.and.rest.navigation.AppScreens
 import ch.heigvd.iict.and.rest.ui.TopBar
 import ch.heigvd.iict.and.rest.ui.theme.MyComposeApplicationTheme
@@ -125,9 +126,9 @@ fun ContactItemView(contact: Contact, onClick : (Contact) -> Unit) {
 }
 
 val contactsDemo = listOf(
-    Contact(null, "Dupont", "Roger", null, null, "", "1400", "Yverdon", PhoneType.HOME, "+41 21 944 23 55"),
-    Contact(null, "Dupond", "Tatiana", null, null, "", "1000", "Lausanne", PhoneType.OFFICE, "+41 24 763 34 12"),
-    Contact(null, "Toto", "Tata", null, null, "", "1400", "Yverdon", PhoneType.MOBILE, "+41 21 456 25 36")
+    Contact(null, "Dupont", "Roger", null, null, "", "1400", "Yverdon", PhoneType.HOME, "+41 21 944 23 55", remoteId = null, status = StatusType.NEW),
+    Contact(null, "Dupond", "Tatiana", null, null, "", "1000", "Lausanne", PhoneType.OFFICE, "+41 24 763 34 12", remoteId = null, status = StatusType.NEW),
+    Contact(null, "Toto", "Tata", null, null, "", "1400", "Yverdon", PhoneType.MOBILE, "+41 21 456 25 36", remoteId = null, status = StatusType.NEW)
 )
 
 @Preview(showBackground = true)
