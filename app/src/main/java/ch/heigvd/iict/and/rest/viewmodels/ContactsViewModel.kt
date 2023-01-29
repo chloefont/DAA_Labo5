@@ -5,18 +5,16 @@ import android.util.Log
 import androidx.lifecycle.*
 import ch.heigvd.iict.and.rest.ContactsApplication
 import ch.heigvd.iict.and.rest.models.Contact
+import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.models.StatusType
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
-import java.io.DataOutputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.LinkedList
 
 
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
@@ -67,7 +65,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             fun update(contact: Contact) {
                 val remoteId: Long? = put_contact(contact)
 
-                contact.remoteId = remoteId;
+                contact.remoteId = remoteId
                 contact.status = StatusType.OK
                 changeContact(contact)
             }
@@ -75,7 +73,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             fun new(contact: Contact) {
                 val remoteId = post_contact(contact)
 
-                contact.remoteId = remoteId;
+                contact.remoteId = remoteId
                 contact.status = StatusType.OK
                 changeContact(contact)
             }
@@ -101,10 +99,39 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun post_contact(contact: Contact): Long? {
-        return 0;
+        var id = contact.remoteId;
+        val url = URL("https://daa.iict.ch/contacts/")
+
+
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "POST"
+        conn.setRequestProperty("x-uuid", apiUuid!!)
+        conn.setRequestProperty("Content-Type", "application/json")
+
+        contact.id = null
+        val gson = Gson()
+        val json: String = gson.toJson(contact)
+        conn.outputStream.use { output ->
+            output.write(json.toByteArray(Charsets.UTF_8))
+        }
+
+        if(conn.responseCode != 201){
+            return null
+        }
+
+        var data = "";
+        BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
+            data = br.readText()
+        }
+
+        val valtype = Contact::class.java
+        val result = gson.fromJson(data, valtype)
+
+        return result.id
     }
 
     fun get_contacts(): List<Contact> {
+
         val url = URL("https://daa.iict.ch/contacts")
 
 
@@ -125,15 +152,66 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     }
 
     fun get_contact(id: Long): Contact? {
-        return null;
+        // TODO ne marche pas
+        val url = URL("https://daa.iict.ch/contacts/$id")
+
+
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "GET"
+        conn.setRequestProperty("x-uuid", apiUuid!!)
+
+        var data = "";
+        BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
+            data = br.readText()
+        }
+        println(data)
+        val gson = Gson()
+        val valtype = Contact::class.java
+
+        return gson.fromJson(data, valtype);
     }
 
     fun delete_contact(contact: Contact): Boolean {
-        return true;
+        var id = contact.remoteId;
+        val url = URL("https://daa.iict.ch/contacts/$id")
+
+
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "DELETE"
+        conn.setRequestProperty("x-uuid", apiUuid!!)
+
+        return conn.responseCode == 204
     }
 
     fun put_contact(contact: Contact): Long? {
-        return 0;
+        var id = contact.remoteId;
+        val url = URL("https://daa.iict.ch/contacts/$id")
+
+
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "PUT"
+        conn.setRequestProperty("x-uuid", apiUuid!!)
+        conn.setRequestProperty("Content-Type", "application/json")
+
+        val gson = Gson()
+        val json: String = gson.toJson(contact)
+        conn.outputStream.use { output ->
+            output.write(json.toByteArray(Charsets.UTF_8))
+        }
+
+        if(conn.responseCode != 200){
+            return null
+        }
+
+        var data = "";
+        BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
+            data = br.readText()
+        }
+
+        val valtype = Contact::class.java
+        val result = gson.fromJson(data, valtype)
+
+        return result.id
     }
 
     fun addContact(contact: Contact) {
