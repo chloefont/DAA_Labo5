@@ -82,12 +82,14 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             }
 
             // Lancer thread IO
-            run {
-                when (contact.status) {
-                    StatusType.DELETED -> delete(contact)
-                    StatusType.UPDATED -> update(contact)
-                    StatusType.NEW -> new(contact)
-                    StatusType.OK -> {}
+            viewModelScope.launch {
+                withContext(Dispatchers.IO) {
+                    when (contact.status) {
+                        StatusType.DELETED -> delete(contact)
+                        StatusType.UPDATED -> update(contact)
+                        StatusType.NEW -> new(contact)
+                        StatusType.OK -> {}
+                    }
                 }
             }
 
