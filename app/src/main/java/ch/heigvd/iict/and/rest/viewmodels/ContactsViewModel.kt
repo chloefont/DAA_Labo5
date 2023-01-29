@@ -56,9 +56,9 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             ).edit().putString("UUID", apiUuid).apply()
             Log.i("DEV", "UUID: $apiUuid")
 
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 val contacts = get_contacts()
-                for (contact in contacts){
+                for (contact in contacts) {
                     contact.remoteId = contact.id
                     contact.id = null
                     contact.status = StatusType.OK
@@ -125,15 +125,16 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         conn.setRequestProperty("Content-Type", "application/json")
 
         contact.id = null
+        //contact.birthday = null
         val gson = GsonBuilder()
-            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .registerTypeHierarchyAdapter(Calendar::class.java, CalendarTypeAdapter())
             .create()
         val json: String = gson.toJson(contact)
         conn.outputStream.use { output ->
             output.write(json.toByteArray(Charsets.UTF_8))
         }
 
-        if(conn.responseCode != 201){
+        if (conn.responseCode != 201) {
             return null
         }
 
@@ -163,10 +164,10 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         }
 
         val gson = GsonBuilder()
-            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .registerTypeHierarchyAdapter(Calendar::class.java, CalendarTypeAdapter())
             .create()
         val valtype = object : TypeToken<List<Contact>?>() {}.type
-        val result:List<Contact> = gson.fromJson<List<Contact>>(data, valtype) as List<Contact>
+        val result: List<Contact> = gson.fromJson<List<Contact>>(data, valtype) as List<Contact>
 
         return result;
     }
@@ -214,14 +215,14 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         conn.setRequestProperty("Content-Type", "application/json")
 
         val gson = GsonBuilder()
-            .registerTypeAdapter(Calendar::class.java, CalendarTypeAdapter())
+            .registerTypeHierarchyAdapter(Calendar::class.java, CalendarTypeAdapter())
             .create()
         val json: String = gson.toJson(contact)
         conn.outputStream.use { output ->
             output.write(json.toByteArray(Charsets.UTF_8))
         }
 
-        if(conn.responseCode != 200){
+        if (conn.responseCode != 200) {
             return null
         }
 
@@ -238,12 +239,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun addContact(contact: Contact) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 contact.status = StatusType.NEW
 
                 if (apiUuid != null) {
-                    var remoteId:Long? = post_contact(contact)
-                    if (remoteId != null){
+                    var remoteId: Long? = post_contact(contact)
+                    if (remoteId != null) {
                         contact.remoteId = remoteId
                         contact.status = StatusType.OK
                     }
@@ -257,14 +258,18 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun changeContact(contact: Contact) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO){
+            var id = contact.id
+            withContext(Dispatchers.IO) {
                 contact.status = StatusType.UPDATED
                 if (apiUuid != null) {
-                    val remoteId:Long? = put_contact(contact)
-                    contact.remoteId = remoteId
-                    contact.status = StatusType.OK
+                    contact.id = contact.remoteId
+                    val remoteId: Long? = put_contact(contact)
+                    if (remoteId != null){
+                        contact.remoteId = remoteId
+                        contact.status = StatusType.OK
+                    }
                 }
-
+                contact.id = id
                 repository.changeContact(contact)
             }
         }
@@ -272,14 +277,15 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun deleteContact(contact: Contact) {
         viewModelScope.launch {
-
-            if (apiUuid != null) {
-                val ok = delete_contact(contact)
-                if (ok) {
-                    repository.deleteContact(contact)
-                }else{
-                    contact.status = StatusType.DELETED
-                    repository.changeContact(contact)
+            withContext(Dispatchers.IO) {
+                if (apiUuid != null) {
+                    val ok = delete_contact(contact)
+                    if (ok) {
+                        repository.deleteContact(contact)
+                    } else {
+                        contact.status = StatusType.DELETED
+                        repository.changeContact(contact)
+                    }
                 }
             }
 

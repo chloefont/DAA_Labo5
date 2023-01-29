@@ -149,6 +149,7 @@ fun ScreenEditContact(
                         contactsViewModel.addContact(newContact)
                     } else if (found != null) {
                         newContact.id = found.id
+                        newContact.status = StatusType.UPDATED
                         contactsViewModel.changeContact(newContact)
                     }
 
