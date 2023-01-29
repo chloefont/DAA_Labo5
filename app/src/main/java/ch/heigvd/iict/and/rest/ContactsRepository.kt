@@ -36,6 +36,14 @@ class ContactsRepository(private val contactsDao: ContactsDao) {
         return contact
     }
 
+    fun getAllContacts() : List<Contact> {
+        var contact : List<Contact>? = null
+        thread {
+            contact = contactsDao.getAllContacts()
+        }
+        return contact!!
+    }
+
     fun deleteContact(contact: Contact) {
         thread {
             contactsDao.delete(contact)

@@ -18,18 +18,25 @@ import java.util.LinkedList
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
 
     private val repository = application.repository
-    private var apiUuid : String? = null
+    private var apiUuid: String? = null
 
     init {
-        if (getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).contains("UUID")) {
-            apiUuid = getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).getString("UUID", "")
+        if (getApplication<ContactsApplication>().getSharedPreferences(
+                "ContactsApp",
+                Context.MODE_PRIVATE
+            ).contains("UUID")
+        ) {
+            apiUuid = getApplication<ContactsApplication>().getSharedPreferences(
+                "ContactsApp",
+                Context.MODE_PRIVATE
+            ).getString("UUID", "")
         }
     }
 
-    val allContacts : LiveData<List<Contact>>get() = repository.allContacts
+    val allContacts: LiveData<List<Contact>> get() = repository.allContacts
     val apiBaseURL = "https://daa.iict.ch"
 
-    fun getContactById(id: Long?) : Contact? {
+    fun getContactById(id: Long?): Contact? {
         return allContacts.value?.find { it.id == id }
     }
 
@@ -38,45 +45,72 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             repository.clearAllContacts()
 
             apiUuid = getAPIUuid()
-            getApplication<ContactsApplication>().getSharedPreferences("ContactsApp", Context.MODE_PRIVATE).edit().putString("UUID", apiUuid).apply()
+            getApplication<ContactsApplication>().getSharedPreferences(
+                "ContactsApp",
+                Context.MODE_PRIVATE
+            ).edit().putString("UUID", apiUuid).apply()
             Log.i("DEV", "UUID: $apiUuid")
         }
     }
 
     fun refresh() {
-        viewModelScope.launch {
-            if (apiUuid != null) {
-                val url = URL("$apiBaseURL/contacts")
-                val connection = url.openConnection() as HttpURLConnection
-                connection.doOutput = true
-                connection.requestMethod = "GET"
-                connection.setRequestProperty("X-UUID", apiUuid)
+        var contacts = repository.getAllContacts();
+        for (contact in contacts) {
+            if (contact.status == StatusType.OK) {
+                continue;
+            }
 
-                connection.inputStream.use { input ->
-                    val result = input.bufferedReader().use { it.readText() }
-                    Log.d("DEV", "Result: $result")
+            fun update(contact: Contact) {
+                val remoteId: Long? = put_contact(contact)
+
+                contact.remoteId = remoteId;
+                contact.status = StatusType.OK
+                changeContact(contact)
+            }
+
+            fun new(contact: Contact) {
+                val remoteId = post_contact(contact)
+
+                contact.remoteId = remoteId;
+                contact.status = StatusType.OK
+                changeContact(contact)
+            }
+
+            fun delete(contact: Contact) {
+                val result = delete_contact(contact)
+                deleteContact(contact)
+            }
+
+            // Lancer thread IO
+            run {
+                when (contact.status) {
+                    StatusType.DELETED -> delete(contact)
+                    StatusType.UPDATED -> update(contact)
+                    StatusType.NEW -> new(contact)
+                    StatusType.OK -> {}
                 }
             }
+
         }
     }
 
-    fun post_contact(contact: Contact):Long?{
+    fun post_contact(contact: Contact): Long? {
         return 0;
     }
 
-    fun get_contacts():List<Contact>{
+    fun get_contacts(): List<Contact> {
         return LinkedList<Contact>();
     }
 
-    fun get_contact(id:Long):Contact?{
+    fun get_contact(id: Long): Contact? {
         return null;
     }
 
-    fun delete_contact(contact: Contact):Boolean{
+    fun delete_contact(contact: Contact): Boolean {
         return true;
     }
 
-    fun put_contact(contact: Contact):Long?{
+    fun put_contact(contact: Contact): Long? {
         return 0;
     }
 
@@ -103,13 +137,13 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         }
     }
 
-    suspend fun getAPIUuid() : String = withContext(Dispatchers.IO) {
+    suspend fun getAPIUuid(): String = withContext(Dispatchers.IO) {
 
         val url = URL("$apiBaseURL/enroll")
         return@withContext url.readText(Charsets.UTF_8)
     }
 
-    suspend fun apiAddContact(contact: Contact) : Long? = withContext(Dispatchers.IO) {
+    suspend fun apiAddContact(contact: Contact): Long? = withContext(Dispatchers.IO) {
 
         val url = URL("$apiBaseURL/contacts")
         val connection = url.openConnection() as HttpURLConnection
@@ -135,7 +169,8 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
 }
 
-class ContactsViewModelFactory(private val application: ContactsApplication) : ViewModelProvider.Factory {
+class ContactsViewModelFactory(private val application: ContactsApplication) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ContactsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
